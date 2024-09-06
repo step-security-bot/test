@@ -1,0 +1,51 @@
+name: Release new action version
+on:
+  workflow_dispatch:
+    inputs:
+      TAG_NAME:
+        description: 'Tag name that the major tag will point to'
+        required: true
+
+env:
+  TAG_NAME: ${{ github.event.inputs.TAG_NAME || github.event.release.tag_name }}
+defaults:
+  run:
+    shell: pwsh
+
+permissions:  # added using https://github.com/step-security/secure-workflows
+  contents: read
+
+jobs:
+  update_tag:
+    name: Update the major tag to include the ${{ github.event.inputs.TAG_NAME || github.event.release.tag_name }} changes
+    # Remember to configure the releaseNewActionVersion environment with required approvers in the repository settings
+    environment:
+      name: releaseNewActionVersion
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: step-security/harden-runner@5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde
+      with:
+        egress-policy: audit
+        allowed-endpoints:
+          api.github.com:443
+          github.com:443
+
+    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+    - name: Update the rc tag
+      uses: step-security/publish-action@b438f840875fdcb7d1de4fc3d1d30e86cf6acb5d
+      with:
+        source-tag: ${{ env.TAG_NAME }}
+        rc: true
+
+    - name: Canary test
+      uses: docker://ghcr.io/step-security/integration-test/int:latest@sha256:23f67e55b65853d25686de722abc549182c45321fe71537401bdb9b33b89b75a
+      env:
+        PAT: ${{ secrets.PAT }}
+        canary: true
+
+    - name: Update the ${{ env.TAG_NAME }} tag
+      uses: step-security/publish-action@b438f840875fdcb7d1de4fc3d1d30e86cf6acb5d
+      with:
+        source-tag: ${{ env.TAG_NAME }}

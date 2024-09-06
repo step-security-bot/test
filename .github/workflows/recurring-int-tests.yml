@@ -1,0 +1,39 @@
+name: Recurring INT tests
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 */2 * * *' # every other hour
+
+permissions:
+  contents: read
+
+jobs:
+  int-tests:
+    name: int tests
+    runs-on: ubuntu-latest
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde
+      with:
+        egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+    - name: Canary test
+      uses: docker://ghcr.io/step-security/integration-test/int:latest@sha256:23f67e55b65853d25686de722abc549182c45321fe71537401bdb9b33b89b75a
+      env:
+        PAT: ${{ secrets.PAT }}
+        canary: true
+
+  int-tls-tests:
+    name: int tls tests
+    runs-on: ubuntu-latest
+    steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@5c7944e73c4c2a096b17a9cb74d65b6c2bbafbde
+      with:
+        egress-policy: audit # TODO: change to 'egress-policy: block' after couple of runs
+
+    - name: Canary test
+      uses: docker://ghcr.io/step-security/integration-test/int:latest@sha256:23f67e55b65853d25686de722abc549182c45321fe71537401bdb9b33b89b75a
+      env:
+        PAT: ${{ secrets.PAT }}
+        canary-tls: true
