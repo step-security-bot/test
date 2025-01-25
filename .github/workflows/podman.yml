@@ -3,13 +3,16 @@ name: Build Container with Podman
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-24.04
     steps:
      
       - name: Harden Runner
-        uses: step-security/harden-runner@v2
+        uses: step-security/harden-runner@cb605e52c26070c328afc4562f0b4ada7618a84e # v2.10.4
         with:
           egress-policy: audit
           allowed-endpoints: >
@@ -23,7 +26,7 @@ jobs:
           sudo resolvectl default-route eth0 no
           sudo systemctl restart systemd-resolved
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - run: cat /run/systemd/resolve/resolv.conf
       - name: Build Container Image with Podman

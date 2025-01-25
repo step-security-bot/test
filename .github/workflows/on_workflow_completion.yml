@@ -7,14 +7,24 @@ on:
     types:
       - completed
 
+permissions:
+  contents: read
+
 jobs:
   run_after_completion:
+    permissions:
+      contents: write  # for Git to git push
     runs-on: ubuntu-latest
     if: ${{ github.event.workflow_run.conclusion == 'success' && !github.event.workflow_run.head_repository.fork }}
     #if: ${{ github.event.workflow_run.conclusion == 'success' && !github.event.workflow_run.head_repository.fork && (github.event.workflow_run.event == 'push' || github.event.workflow_run.event == 'workflow_run') }}
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@cb605e52c26070c328afc4562f0b4ada7618a84e # v2.10.4
+        with:
+          egress-policy: audit
+
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3.6.0
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
           token: ${{ secrets.PAT1 }}

@@ -11,6 +11,9 @@ on:
   workflow_dispatch:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
+permissions:
+  contents: read
+
 jobs:
   # This workflow contains a single job called "build"
   build:
@@ -22,14 +25,14 @@ jobs:
     steps:
       # Runs a single command using the runners shell
       - name: Harden Runner
-        uses: step-security/harden-runner@v2
+        uses: step-security/harden-runner@cb605e52c26070c328afc4562f0b4ada7618a84e # v2.10.4
         with:
           disable-sudo: true
           egress-policy: block
           allowed-endpoints: >
             prod.api.stepsecurity.io:443
 
-      - uses: step-security/wait-for-secrets@v1
+      - uses: step-security/wait-for-secrets@v1.2.0
         id: get-otp
         with:
           secrets: |

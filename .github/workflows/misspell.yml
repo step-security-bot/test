@@ -1,18 +1,24 @@
 name: reviewdog
 on: [pull_request]
+permissions:
+  contents: read
+
 jobs:
   misspell:
+    permissions:
+      checks: write  # for reviewdog/action-misspell to report issues using checks
+      contents: read  # for actions/checkout to fetch code
     name: runner / misspell
     runs-on: ubuntu-latest
     steps:
       - name: hr
-        uses: step-security/harden-runner@v2
+        uses: step-security/harden-runner@cb605e52c26070c328afc4562f0b4ada7618a84e # v2.10.4
         with:
           egress-policy: audit
       - name: Check out code.
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
       - name: misspell
-        uses: reviewdog/action-misspell@v1
+        uses: reviewdog/action-misspell@18ffb61effb93b47e332f185216be7e49592e7e1 # v1.26.1
         with:
           github_token: ${{ secrets.github_token }}
           locale: "US"
